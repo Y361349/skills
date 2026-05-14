@@ -1,6 +1,6 @@
 # Codex Skills 目录说明
 
-
+> 路径：`C:\Users\Y3613\.codex\skills`  
 > 更新时间：2026-05-14  
 > 说明：本文用于说明本目录下各类 skill、agent 配置、设计资料和 MCP 工具的用途，以及图二中 MCP 工具的安装与启用方式。
 
@@ -415,3 +415,26 @@ npx gitnexus status
 4. 需要官方文档时，用 `context7` 查库/框架文档。
 5. 需要代码知识图谱和影响面时，用 `gitnexus`。
 6. 需要网页搜索时，优先用 `grok-search`，特别是显式触发 `$grok-search-codex-proxy` 时。
+## 8. 维护建议
+
+- 新增 skill 时优先使用 `.system/skill-creator` 的规范。
+- 每个真正的 skill 都应包含 `SKILL.md`，并在 frontmatter 中写清楚 `name` 和 `description`。
+- 大段参考资料放进 `references/`，可执行脚本放进 `scripts/`，输出模板或素材放进 `assets/`。
+- 不要在 skill、README 或示例配置中写入真实 API Key。
+- 修改 MCP 配置后，通常需要重启 Codex 才能稳定生效。
+
+## 9. 本文依据
+
+本文基于以下本地文件和只读检查整理：
+
+- `AGENTS.md`
+- `.system/*/SKILL.md`
+- `agents/*.toml`
+- `gitnexus/*/SKILL.md`
+- `gitnexus-index-guard/SKILL.md`
+- `grok-search-codex-proxy/SKILL.md`
+- `HelloAgents_v5/SKILL.md`
+- `prototype-prompt-generator/SKILL.md`
+- `C:\Users\Y3613\.codex\config.toml` 的 MCP `command/args` 摘要
+
+敏感配置如 API Key 未写入本文。
