@@ -191,3 +191,227 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 command = "uvx"
 args = ["code-index-mcp"]
 ```
+验证：
+
+```powershell
+uvx code-index-mcp --help
+```
+
+使用要点：
+
+- 每个新会话首次使用前先设置项目根目录。
+- 典型顺序：`set_project_path(<项目根目录>)` → `refresh_index`。
+- 只有确需符号级分析时才运行深度索引。
+
+### 5.3 安装/启用 `context7`
+
+Context7 用于查询库/框架文档。当前 npm 包信息显示入口为 `context7-mcp`。
+
+推荐配置：
+
+```toml
+[mcp_servers.context7]
+command = "D:\\java\\Node\\nvm\\v20.19.1\\npx.cmd"
+args = ["-y", "@upstash/context7-mcp"]
+```
+
+如果你有 Context7 API Key，可以追加：
+
+```toml
+args = ["-y", "@upstash/context7-mcp", "--api-key", "<CTX7_API_KEY>"]
+```
+
+验证：
+
+```powershell
+npx -y @upstash/context7-mcp --help
+```
+
+使用要点：
+
+- 先 resolve library id，再 query docs。
+- 适合 React、Next.js、Spring、OpenAI SDK 等官方文档查询。
+
+### 5.4 安装/启用 `desktop_commander`
+
+Desktop Commander 用于读写文件、搜索目录、管理本地进程和分析本地数据。
+
+推荐配置：
+
+```toml
+[mcp_servers.desktop_commander]
+command = "D:\\java\\Node\\nvm\\v20.19.1\\npx.cmd"
+args = ["-y", "@wonderwhy-er/desktop-commander", "--transport", "stdio"]
+```
+验证：
+
+```powershell
+npx -y @wonderwhy-er/desktop-commander --help
+```
+
+使用要点：
+
+- 适合读写文件、列目录、局部读取大文件。
+- 本地 CSV/JSON/PDF/Excel 分析优先用它的进程工具。
+- 文件编辑建议用精确替换或分块写入。
+
+### 5.5 安装/启用 `sequential_thinking`
+
+Sequential Thinking 用于复杂问题拆解和计划生成。
+
+推荐配置：
+
+```toml
+[mcp_servers.sequential_thinking]
+command = "D:\\java\\Node\\nvm\\v20.19.1\\npx.cmd"
+args = ["-y", "@modelcontextprotocol/server-sequential-thinking", "--transport", "stdio"]
+```
+
+验证：
+
+```powershell
+npx -y @modelcontextprotocol/server-sequential-thinking --help
+```
+
+使用要点：
+
+- 适合复杂任务规划、方案评估、步骤拆分。
+- 输出应转化为可执行计划，不应把冗长推理暴露给最终用户。
+
+### 5.6 安装/启用 `gitnexus`
+
+图二里 `gitnexus` 显示“已停止”。我本机核验到 npm 上存在 `gitnexus` 包，版本为 `1.6.4`，CLI 入口为 `gitnexus`。
+
+先验证 CLI 是否可用：
+
+```powershell
+npx gitnexus --help
+npx gitnexus status
+```
+在项目根目录初始化索引：
+
+```powershell
+cd <你的项目根目录>
+npx gitnexus analyze
+```
+
+可选命令：
+
+```powershell
+npx gitnexus status      # 查看索引状态
+npx gitnexus clean       # 删除当前仓库索引
+npx gitnexus list        # 列出已索引仓库
+npx gitnexus wiki        # 基于图谱生成文档，通常需要 LLM API Key
+```
+
+如果需要保留或生成向量检索能力：
+
+```powershell
+npx gitnexus analyze --embeddings
+```
+
+`gitnexus` MCP server 的精确配置项要以你安装的 GitNexus 文档或现有 MCP 面板生成项为准。若 Codex 面板里有 `gitnexus` 但停止，优先排查：
+
+1. `config.toml` 里是否存在 `[mcp_servers.gitnexus]`。
+2. `command` 指向的可执行文件是否存在。
+3. `args` 是否与当前 GitNexus 版本匹配。
+4. 是否需要先在目标仓库运行 `npx gitnexus analyze`。
+5. 停止后重启 Codex 或重新加载 MCP server。
+
+索引守护检测命令：
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File "$env:USERPROFILE\.codex\skills\gitnexus-index-guard\scripts\check_gitnexus_index.ps1" -RepoPath "<repo>" -OnlyCheck
+```
+
+### 5.7 安装/启用 `grok-search`
+
+图二没有展示 `grok-search`，但当前目录有 `grok-search-codex-proxy` skill。若你要把 GrokSearch 作为 MCP 搜索工具接入 Codex，应通过本技能的 stdio 代理启动。
+
+推荐配置形态：
+```toml
+[mcp_servers.grok-search]
+command = "D:\\java\\Node\\nvm\\v20.19.1\\node.exe"
+args = ["C:\\Users\\Y3613\\.codex\\skills\\grok-search-codex-proxy\\scripts\\stdio-proxy.js"]
+
+[mcp_servers.grok-search.env]
+GROK_API_URL = "<你的 Grok API URL>"
+GROK_API_KEY = "<你的 Grok API Key>"
+GROK_WEB_SEARCH_MODE = "grok-only"
+GROK_FORCE_MODEL = "grok-4-fast"
+```
+
+验证代理握手：
+
+```powershell
+node "$env:USERPROFILE\.codex\skills\grok-search-codex-proxy\scripts\mcp-smoke-test.js" --with-config
+```
+
+如果要验证搜索能力：
+
+```powershell
+node "$env:USERPROFILE\.codex\skills\grok-search-codex-proxy\scripts\mcp-smoke-test.js" --with-config --search "OpenAI Codex MCP"
+```
+
+注意：
+
+- 不要把 `GROK_API_KEY` 写进 README 或公开仓库。
+- 若用户显式写 `$grok-search-codex-proxy`，应只用 grok-search，不自动降级 DuckDuckGo。
+- 如果 initialize 握手失败，优先确认 `stdio-proxy.js` 路径和 Node.js 路径。
+
+## 6. 常见排错
+
+### 6.1 MCP 显示“已停止”
+
+按顺序排查：
+
+1. 打开 `C:\Users\Y3613\.codex\config.toml`。
+2. 找到对应 `[mcp_servers.<name>]`。
+3. 确认 `command` 路径存在。
+4. 在 PowerShell 中单独运行对应 `npx/uvx/node` 命令。
+5. 如果是需要 API Key 的工具，确认 env 已配置且没有拼写错误。
+6. 重启 Codex 或在 UI 中重新启用该 MCP。
+
+### 6.2 `npx` 找不到或版本不对
+
+你当前本机 Node 路径类似：
+
+```text
+D:\java\Node\nvm\v20.19.1\node.exe
+D:\java\Node\nvm\v20.19.1\npx.cmd
+```
+
+如果换了 Node 版本，`config.toml` 里的 `npx.cmd` 路径也要同步调整。
+
+### 6.3 `code-index` 找不到
+
+先检查：
+
+```powershell
+uvx --version
+uvx code-index-mcp --help
+```
+
+如果 `uvx` 不存在，先安装 `uv`。如果 `code-index-mcp` 启动失败，优先看 Codex MCP 日志或切换到提示词中提到的 legacy 配置。
+
+### 6.4 `gitnexus` 停止
+
+优先确认 CLI 能跑：
+
+```powershell
+npx gitnexus --help
+npx gitnexus status
+```
+
+如果 CLI 正常但 MCP 停止，说明问题更可能在 Codex 的 MCP server 配置，而不是 GitNexus 包本身。
+
+## 7. 建议的使用顺序
+
+做代码类任务时，推荐这样组合：
+
+1. 用 `code-index` 快速定位文件和符号。
+2. 用 `Desktop Commander` 精读目标文件片段。
+3. 需要规划复杂任务时，用 `sequential_thinking` 拆解步骤。
+4. 需要官方文档时，用 `context7` 查库/框架文档。
+5. 需要代码知识图谱和影响面时，用 `gitnexus`。
+6. 需要网页搜索时，优先用 `grok-search`，特别是显式触发 `$grok-search-codex-proxy` 时。
