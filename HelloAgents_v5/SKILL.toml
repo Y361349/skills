@@ -1,0 +1,5 @@
+[interface]
+display_name = "HelloAgents_v5"
+short_description = "多代理分工增强：阶段/命令 + 输出SSOT + 脚本化方案包链路 + multi_agent 角色编排"
+brand_color = "#5B7CFA"
+default_prompt = ""

@@ -1,0 +1,52 @@
+# HelloAgents_v5 - Codex multi_agent 参考配置（示例）
+#
+# 用途：启用 multi_agent + 定义多角色分工（agent roles）+ 支持自定义子代理。
+#
+# 放置位置（二选一）：
+# 1) 用户级：%USERPROFILE%\.codex\config.toml  （推荐：跨项目复用）
+# 2) 项目级：<repo>\.codex\config.toml        （注意：仅在“信任项目”后生效）
+#
+# 注意：
+# - roles 的 config_file 相对路径以“声明该 role 的 config.toml 文件所在目录”为基准解析。
+# - 如果你把 roles 写在用户级 config.toml，推荐把 role 配置文件放到：%USERPROFILE%\.codex\agents\
+# - 如果你把 roles 写在项目级 .codex/config.toml，推荐把 role 配置文件放到：<repo>\.codex\agents\
+
+[features]
+multi_agent = true
+
+[agents]
+# 同时打开的子代理线程上限（根据机器性能与任务粒度调整）
+max_threads = 6
+
+# 主代理：编排者（默认角色）
+[agents.default]
+description = "HelloAgents 主代理：负责需求/决策/汇总；默认执行写入与验收；测试/构建/回归只由主代理串行执行。"
+
+# 只读探索：定位真相源与证据锚点
+[agents.ha_explorer]
+description = "HelloAgents 探索者：只读检索/精读/定位证据锚点；输出短结论 + 可验证证据；禁止写入与跑测试。"
+config_file = "agents/ha-explorer.toml"
+
+# 只读审查：安全/正确性/测试风险/可维护性
+[agents.ha_reviewer]
+description = "HelloAgents 审查者：只读审查安全/正确性/测试风险/可维护性；输出风险点 + 证据锚点 + 建议。"
+config_file = "agents/ha-reviewer.toml"
+
+# 可选：产品决策（范围/验收/成功指标）
+[agents.ha_product]
+description = "HelloAgents 产品决策：补齐 why.md 的产品分析/验收与验证；只读输出建议，禁止写入。"
+config_file = "agents/ha-product.toml"
+
+# 可选：UX/UI 决策（交互/状态/文案/视觉规范）
+[agents.ha_ui_designer]
+description = "HelloAgents UX/UI 决策：补齐 why.md 的 UX/UI 章节；只读输出建议，禁止写入。"
+config_file = "agents/ha-ui-designer.toml"
+
+# 可选：受控写入执行者（只接收写入包；不做扩展推理）
+[agents.ha_writer_backend]
+description = "HelloAgents 后端写入者：只按主代理提供的写入包落地；禁止改口径/扩范围；遇冲突立即停止回报。"
+config_file = "agents/ha-writer-backend.toml"
+
+[agents.ha_writer_frontend]
+description = "HelloAgents 前端写入者：只按主代理提供的写入包落地；禁止改口径/扩范围；遇冲突立即停止回报。"
+config_file = "agents/ha-writer-frontend.toml"
